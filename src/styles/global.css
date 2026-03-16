@@ -1,0 +1,78 @@
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  src: url('/fonts/BricolageGrotesque-VariableFont.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Chateau palette — enriched */
+  --color-bg:            #181a20;
+  --color-bg-light:      #33363f;
+  --color-bg-dark:       #0e0f13;
+  --color-bg-intro:      #0a0b0e;
+  --color-text:          #EAE0D5;
+  --color-text-muted:    rgba(234, 224, 213, 0.5);
+  --color-text-dim:      rgba(234, 224, 213, 0.3);
+  --color-accent:        #C6AC8F;
+  --color-accent-warm:   #d4b896;
+  --color-accent-hover:  #fff3d5;
+  --color-accent-glow:   rgba(198, 172, 143, 0.15);
+  --color-border:        rgba(234, 224, 213, 0.08);
+
+  /* Command bar */
+  --color-cb-bg:         rgba(28, 30, 38, 0.88);
+  --color-cb-border:     rgba(198, 172, 143, 0.2);
+
+  /* Typography */
+  --font: 'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Spacing */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  48px;
+  --space-2xl: 80px;
+  --space-3xl: 120px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Noise grain overlay — adds texture/depth to entire page */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(198, 172, 143, 0.3);
+  color: var(--color-text);
+}
