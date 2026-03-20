@@ -27,8 +27,8 @@
 
   <!-- Tagline -->
   <div class="headline">
-    <h1>Your workday,<br/><span class="headline-accent">made lighter</span></h1>
-    <p class="subheadline">The only AI assistant that works across all your tools, applications and Mac.</p>
+    <h1>Your workload,<br/><span class="headline-accent">made lighter</span></h1>
+    <p class="subheadline">The only AI assistant that works from everywhere you do.</p>
   </div>
 
   <!-- Command bar mock -->
@@ -37,7 +37,7 @@
     <div class="cb-glow-core" aria-hidden="true"></div>
     <div class="cb-glow-rays" aria-hidden="true"></div>
     <div class="command-bar-mock">
-      <div class="cb-agent-area">
+      <div class="cb-agent-area cb-collapsed">
         <div class="cb-response" id="cb-response"></div>
         <div class="cb-footer">
           <div class="cb-status" id="cb-state-thinking">
@@ -56,11 +56,11 @@
         </div>
       </div>
 
-      <div class="cb-divider"></div>
+      <div class="cb-divider cb-collapsed"></div>
 
       <div class="cb-input-area">
         <div class="cb-input-scroll">
-          <div class="cb-input-text" id="cb-prompt">write a follow-up email to Sarah about the Q3 proposal</div>
+          <div class="cb-input-text" id="cb-prompt">follow up with Sarah about Q3</div>
         </div>
         <div class="cb-inline-controls">
           <button class="cb-stop" aria-label="Stop">
@@ -407,6 +407,11 @@
     position: relative;
     z-index: 3;
     pointer-events: none;
+    /* Fixed height container so dynamic command bar doesn't shift layout */
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .command-bar-mock {
@@ -416,10 +421,10 @@
   /* Outer wide wash — fills the area with warm light */
   .cb-glow {
     position: absolute;
-    inset: -200px -280px;
-    background: radial-gradient(ellipse 100% 80% at center, rgba(198, 172, 143, 0.18) 0%, rgba(198, 172, 143, 0.06) 35%, transparent 65%);
+    inset: -300px -400px;
+    background: radial-gradient(ellipse 100% 80% at center, rgba(198, 172, 143, 0.28) 0%, rgba(198, 172, 143, 0.10) 35%, transparent 65%);
     border-radius: 50%;
-    filter: blur(80px);
+    filter: blur(120px);
     z-index: -1;
     animation: glow-outer 5s ease-in-out infinite;
   }
@@ -427,10 +432,10 @@
   /* Hot bright core — concentrated behind the bar */
   .cb-glow-core {
     position: absolute;
-    inset: -40px -60px;
-    background: radial-gradient(ellipse 100% 100% at center, rgba(212, 184, 150, 0.3) 0%, rgba(198, 172, 143, 0.12) 40%, transparent 70%);
+    inset: -80px -120px;
+    background: radial-gradient(ellipse 100% 100% at center, rgba(212, 184, 150, 0.45) 0%, rgba(198, 172, 143, 0.18) 40%, transparent 70%);
     border-radius: 50%;
-    filter: blur(35px);
+    filter: blur(50px);
     z-index: -1;
     animation: glow-core 3.5s ease-in-out infinite;
   }
@@ -441,35 +446,34 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 200px;
-    height: 500px;
-    background: radial-gradient(ellipse 40% 100% at center, rgba(198, 172, 143, 0.1) 0%, transparent 60%);
-    filter: blur(40px);
+    width: 300px;
+    height: 700px;
+    background: radial-gradient(ellipse 40% 100% at center, rgba(198, 172, 143, 0.18) 0%, transparent 60%);
+    filter: blur(60px);
     z-index: -1;
     animation: glow-rays 6s ease-in-out infinite;
   }
 
   @keyframes glow-outer {
-    0%, 100% { opacity: 0.35; transform: scale(0.92); }
-    50% { opacity: 1; transform: scale(1.1); }
+    0%, 100% { opacity: 0.55; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.12); }
   }
 
   @keyframes glow-core {
-    0%, 100% { opacity: 0.4; transform: scale(0.85); }
+    0%, 100% { opacity: 0.6; transform: scale(0.9); }
     50% { opacity: 1; transform: scale(1.2); }
   }
 
   @keyframes glow-rays {
-    0%, 100% { opacity: 0.25; transform: translate(-50%, -50%) scaleY(0.85); }
-    50% { opacity: 0.9; transform: translate(-50%, -50%) scaleY(1.15); }
+    0%, 100% { opacity: 0.45; transform: translate(-50%, -50%) scaleY(0.9); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scaleY(1.15); }
   }
 
   .command-bar-mock {
-    width: 440px;
-    min-height: 146px;
+    width: 350px;
     background: rgba(28, 30, 38, 0.92);
     border: 1px solid rgba(234, 224, 213, 0.1);
-    border-radius: 12px;
+    border-radius: 6px;
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     box-shadow:
@@ -480,23 +484,30 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .cb-agent-area {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 97px;
+    justify-content: flex-end;
+    overflow: hidden;
+    max-height: 120px;
+    transition: max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.25s;
+  }
+
+  .cb-agent-area.cb-collapsed {
+    max-height: 0 !important;
+    opacity: 0;
   }
 
   .cb-response {
-    padding: 10px 16px 4px;
+    padding: 8px 16px 0;
     font-size: 13px;
     line-height: 1.6;
     color: var(--color-accent);
-    min-height: calc(1.6em * 2);
-    max-height: calc(1.6em * 2);
+    max-height: calc(1.6em * 2 + 8px); /* 2 lines + top padding */
     overflow: hidden;
     transition: opacity 0.3s;
     display: -webkit-box;
@@ -505,21 +516,24 @@
   }
 
   .cb-response:empty {
-    visibility: hidden;
+    display: none;
   }
 
   .cb-footer {
     display: flex;
     align-items: center;
-    min-height: 34px;
-    padding: 6px 16px 10px;
+    padding: 8px 16px;
     min-width: 0;
+  }
+
+  .cb-footer:not(:has(.cb-status:not(.cb-status-hidden))) {
+    display: none;
   }
 
   .cb-status {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     min-width: 0;
     font-size: 13px;
     font-weight: 500;
@@ -547,9 +561,9 @@
   }
 
   .cb-tool-icon {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
+    width: 1.1em;
+    height: 1.1em;
+    border-radius: 2px;
     object-fit: contain;
     flex-shrink: 0;
   }
@@ -568,12 +582,16 @@
     height: 1px;
     background: rgba(234, 224, 213, 0.08);
     flex-shrink: 0;
+    transition: opacity 0.25s;
+  }
+
+  .cb-divider.cb-collapsed {
+    opacity: 0;
   }
 
   .cb-input-area {
     position: relative;
-    min-height: 48px;
-    padding: 0 16px;
+    padding: 8px 0 8px 16px;
     display: flex;
     align-items: center;
   }
@@ -591,6 +609,7 @@
     font-size: 13px;
     color: var(--color-text);
     line-height: 1.5;
+    min-height: 21px;
     padding-right: 40px;
     font-family: var(--font);
     transition: opacity 0.3s;
@@ -629,7 +648,8 @@
   /* ─── CTA ──────────────────────────────────────────── */
   .cta-row {
     position: relative;
-    z-index: 2;
+    z-index: 4;
+    isolation: isolate;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -658,6 +678,8 @@
     letter-spacing: 0.01em;
     transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .cta-download:hover {
@@ -1213,52 +1235,58 @@
     steps: Step[];
   };
 
-  const G = 'https://www.google.com/s2/favicons?domain=';
+  const ICONS: Record<string, string> = {
+    gmail: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico',
+    github: 'https://github.githubassets.com/favicons/favicon-dark.svg',
+    gcal: 'https://calendar.google.com/googlecalendar/images/favicons_2020q4/calendar_31.ico',
+    slack: 'https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png',
+    gdrive: 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png',
+    notion: 'https://www.notion.so/front-static/favicon.ico',
+  };
 
   const scenarios: Scenario[] = [
     {
-      prompt: "write a follow-up email to Sarah about the Q3 proposal",
+      prompt: "follow up with Sarah about Q3",
       steps: [
-        { kind: 'thinking',  response: "Reviewing last email thread with Sarah…", duration: 1800 },
-        { kind: 'tool', icon: G+'gmail.com',    name: 'Gmail — Reading thread',      response: "Found 3 emails about the Q3 proposal from last week…", duration: 2000 },
-        { kind: 'thinking',  response: "Drafting a concise follow-up based on open items…", duration: 1800 },
-        { kind: 'tool', icon: G+'gmail.com',    name: 'Gmail — Sending email',        response: "Sending to sarah@acme.com with proposal PDF attached…", duration: 2000 },
+        { kind: 'thinking',  response: "Checking your recent emails with Sarah…", duration: 1400 },
+        { kind: 'tool', icon: ICONS.gmail,    name: 'Gmail: Fetching emails',       response: "Found 3 emails about the Q3 proposal from last week…", duration: 2000 },
+        { kind: 'thinking',  response: "Drafting a follow-up based on the open action items…", duration: 1600 },
+        { kind: 'tool', icon: ICONS.gmail,    name: 'Gmail: Sending email',          response: "Follow-up sent to sarah@acme.com with next steps.", duration: 1800 },
       ],
     },
     {
-      prompt: "summarize my last 3 Zoom meetings into bullet points",
+      prompt: "schedule a daily standup at 9am",
       steps: [
-        { kind: 'thinking',  response: "Finding recent Zoom recordings and transcripts…", duration: 1800 },
-        { kind: 'tool', icon: G+'zoom.us',      name: 'Zoom — Fetching transcripts',  response: "Retrieved transcripts: Design sync, Sprint retro, Stakeholder review…", duration: 2200 },
-        { kind: 'thinking',  response: "Extracting key decisions and action items from each…", duration: 2000 },
-        { kind: 'tool', icon: G+'notion.so',    name: 'Notion — Saving summary',      response: "Saving bullet-point summary to your Meeting Notes page…", duration: 1800 },
+        { kind: 'thinking',  response: "Checking your calendar for conflicts…", duration: 1400 },
+        { kind: 'tool', icon: ICONS.gcal, name: 'Google Calendar: Finding events', response: "No conflicts found in the 9–9:30am slot…", duration: 1800 },
+        { kind: 'tool', icon: ICONS.gcal, name: 'Google Calendar: Creating event',  response: "Recurring standup created Mon–Fri at 9:00am…", duration: 2000 },
+        { kind: 'tool', icon: ICONS.slack,    name: 'Slack: Sending message',        response: "Notified #engineering about the new standup.", duration: 1600 },
       ],
     },
     {
-      prompt: "book a morning flight to NYC for next Tuesday",
+      prompt: "file a GitHub issue for the login bug",
       steps: [
-        { kind: 'thinking',  response: "Checking your travel preferences and frequent flyer accounts…", duration: 1600 },
-        { kind: 'tool', icon: G+'google.com/travel', name: 'Google Flights — Searching', response: "Found 4 morning options SFO→JFK on Tuesday under $350…", duration: 2200 },
-        { kind: 'thinking',  response: "Selecting best option: UA 472, 8:45am, nonstop…", duration: 1600 },
-        { kind: 'tool', icon: G+'calendar.google.com', name: 'Google Calendar — Blocking', response: "Travel day blocked. Reminders set for check-in and departure…", duration: 1800 },
+        { kind: 'thinking',  response: "Reviewing recent Slack messages about the login bug…", duration: 1400 },
+        { kind: 'tool', icon: ICONS.slack,    name: 'Slack: Fetching messages',      response: "Found discussion in #frontend from this morning…", duration: 2000 },
+        { kind: 'thinking',  response: "Drafting issue with reproduction steps…", duration: 1600 },
+        { kind: 'tool', icon: ICONS.github,   name: 'GitHub: Creating issue',        response: "Issue #247 created: \"Login redirect fails on Safari\".", duration: 1800 },
       ],
     },
     {
-      prompt: "pull the Q3 revenue numbers from Salesforce",
+      prompt: "share the latest sales deck",
       steps: [
-        { kind: 'thinking',  response: "Connecting to Salesforce and locating Q3 report…", duration: 1800 },
-        { kind: 'tool', icon: G+'salesforce.com', name: 'Salesforce — Running report', response: "Q3 revenue: $4.2M closed, $1.8M in pipeline. ARR up 22% YoY…", duration: 2400 },
-        { kind: 'thinking',  response: "Formatting summary and preparing export…", duration: 1400 },
-        { kind: 'tool', icon: G+'docs.google.com', name: 'Google Sheets — Exporting',  response: "Numbers exported to your Q3 Review spreadsheet…", duration: 1800 },
+        { kind: 'thinking',  response: "Searching your Google Drive for recent presentations…", duration: 1400 },
+        { kind: 'tool', icon: ICONS.gdrive, name: 'Google Drive: Searching files', response: "Found \"Q3 Sales Deck v2\" updated yesterday…", duration: 2000 },
+        { kind: 'tool', icon: ICONS.slack,    name: 'Slack: Sending message',        response: "Shared the deck link in #sales with a summary.", duration: 1800 },
       ],
     },
     {
-      prompt: "schedule a 1:1 with everyone on my team this week",
+      prompt: "save these notes to Notion",
       steps: [
-        { kind: 'thinking',  response: "Fetching team members from Slack and checking calendars…", duration: 1800 },
-        { kind: 'tool', icon: G+'slack.com',    name: 'Slack — Reading team list',    response: "Found 5 direct reports. Checking mutual availability…", duration: 2000 },
-        { kind: 'tool', icon: G+'calendar.google.com', name: 'Google Calendar — Creating events', response: "Created 5 x 30-min 1:1s across Thursday and Friday…", duration: 2200 },
-        { kind: 'thinking',  response: "Sending calendar invites with agenda template attached…", duration: 1600 },
+        { kind: 'thinking',  response: "Looking at what's on screen…", duration: 1200 },
+        { kind: 'tool', icon: '',               name: 'Executing actions',              response: "Captured meeting notes from the current window…", duration: 2000 },
+        { kind: 'thinking',  response: "Formatting notes with key decisions and action items…", duration: 1600 },
+        { kind: 'tool', icon: ICONS.notion,    name: 'Notion: Creating page',         response: "Notes saved to \"Meeting Notes / March 19 Sync\".", duration: 1800 },
       ],
     },
   ];
@@ -1272,12 +1300,24 @@
     }, 260);
   }
 
-  const promptEl   = document.getElementById('cb-prompt')         as HTMLElement;
-  const responseEl = document.getElementById('cb-response')       as HTMLElement;
-  const stateThink = document.getElementById('cb-state-thinking') as HTMLElement;
-  const stateTool  = document.getElementById('cb-state-tool')     as HTMLElement;
-  const toolIcon   = document.getElementById('cb-tool-icon')      as HTMLImageElement;
-  const toolName   = document.getElementById('cb-tool-name')      as HTMLElement;
+  const promptEl    = document.getElementById('cb-prompt')         as HTMLElement;
+  const responseEl  = document.getElementById('cb-response')       as HTMLElement;
+  const stateThink  = document.getElementById('cb-state-thinking') as HTMLElement;
+  const stateTool   = document.getElementById('cb-state-tool')     as HTMLElement;
+  const toolIcon    = document.getElementById('cb-tool-icon')      as HTMLImageElement;
+  const toolName    = document.getElementById('cb-tool-name')      as HTMLElement;
+  const agentArea   = document.querySelector('.cb-agent-area')     as HTMLElement;
+  const divider     = document.querySelector('.cb-divider')        as HTMLElement;
+
+  function collapseAgent() {
+    agentArea.classList.add('cb-collapsed');
+    divider.classList.add('cb-collapsed');
+  }
+
+  function expandAgent() {
+    agentArea.classList.remove('cb-collapsed');
+    divider.classList.remove('cb-collapsed');
+  }
 
   function showThinking() {
     stateThink.classList.remove('cb-status-hidden');
@@ -1287,29 +1327,54 @@
   function showTool(icon: string, name: string) {
     stateThink.classList.add('cb-status-hidden');
     stateTool.classList.remove('cb-status-hidden');
-    toolIcon.src = icon;
-    toolIcon.alt = name;
+    if (icon) {
+      toolIcon.style.display = '';
+      toolIcon.src = icon;
+      toolIcon.alt = name;
+    } else {
+      toolIcon.style.display = 'none';
+    }
     toolName.textContent = name + '…';
   }
 
+  async function typeText(el: HTMLElement, text: string, charDelay = 35) {
+    el.textContent = '';
+    for (let i = 0; i < text.length; i++) {
+      el.textContent += text[i];
+      await sleep(charDelay + Math.random() * 20 - 10);
+    }
+  }
+
   async function runScenario(scenario: Scenario) {
-    fade(promptEl, () => { promptEl.textContent = scenario.prompt; });
-    responseEl.textContent = '';
-    showThinking();
+    // 1. Show the prompt typed out, agent area collapsed (just input visible)
+    collapseAgent();
+    promptEl.textContent = '';
+    await sleep(300);
+    await typeText(promptEl, scenario.prompt);
     await sleep(400);
 
+    // 2. Expand agent area with thinking state (no response yet, just status)
+    responseEl.textContent = '';
+    showThinking();
+    expandAgent();
+    await sleep(1400);
+
+    // 3. Execute steps — each shows response text + status
     for (const step of scenario.steps) {
       if (step.kind === 'thinking') {
         showThinking();
-        fade(responseEl, () => { responseEl.textContent = step.response; });
       } else {
         showTool(step.icon, step.name);
-        fade(responseEl, () => { responseEl.textContent = step.response; });
       }
+      fade(responseEl, () => { responseEl.textContent = step.response; });
       await sleep(step.duration);
     }
 
-    await sleep(1400);
+    // 4. Collapse agent area and clear the query (like the real app)
+    await sleep(800);
+    collapseAgent();
+    fade(promptEl, () => { promptEl.textContent = ''; });
+    await sleep(600);
   }
 
   function sleep(ms: number) {
