@@ -1335,15 +1335,20 @@
     expandAgent();
     await sleep(1400);
 
-    // 3. Execute steps — each shows response text + status
+    // 3. Execute steps — each streams response text + status
     for (const step of scenario.steps) {
       if (step.kind === 'thinking') {
         showThinking();
       } else {
         showTool(step.icon, step.name);
       }
-      fade(responseEl, () => { responseEl.textContent = step.response; });
-      await sleep(step.duration);
+      responseEl.style.transition = 'opacity 0.25s';
+      responseEl.style.opacity = '0';
+      await sleep(260);
+      responseEl.textContent = '';
+      responseEl.style.opacity = '1';
+      await typeText(responseEl, step.response, 22);
+      await sleep(400);
     }
 
     // 4. Collapse agent area and clear the query (like the real app)
