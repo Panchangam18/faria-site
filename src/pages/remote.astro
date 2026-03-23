@@ -1,0 +1,494 @@
+---
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#000000" />
+    <title>Faria Remote</title>
+    <link rel="manifest" href="/remote/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', system-ui, sans-serif;
+        background: #000;
+        color: #e0e0e0;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        max-width: 600px;
+        margin: 0 auto;
+        width: 100%;
+        padding: 16px;
+        padding-top: env(safe-area-inset-top, 16px);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #222;
+        margin-bottom: 16px;
+      }
+
+      header h1 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #555;
+        transition: background 0.3s;
+      }
+      .status-dot.connected { background: #34c759; }
+      .status-dot.error { background: #ff3b30; }
+
+      /* Setup screen */
+      #setup {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        text-align: center;
+      }
+
+      #setup p {
+        color: #888;
+        font-size: 15px;
+        line-height: 1.5;
+        max-width: 300px;
+      }
+
+      #setup input {
+        width: 100%;
+        max-width: 400px;
+        padding: 14px 16px;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 12px;
+        color: #fff;
+        font-size: 16px;
+        outline: none;
+      }
+      #setup input:focus { border-color: #555; }
+      #setup input::placeholder { color: #555; }
+
+      .btn {
+        padding: 14px 28px;
+        background: #fff;
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .btn:active { opacity: 0.7; }
+      .btn:disabled { opacity: 0.3; cursor: default; }
+      .btn.secondary {
+        background: #222;
+        color: #fff;
+      }
+      .btn.danger {
+        background: #ff3b30;
+        color: #fff;
+      }
+
+      /* Main screen */
+      #main { display: none; flex: 1; flex-direction: column; }
+      #main.active { display: flex; }
+
+      .input-area {
+        position: sticky;
+        top: 0;
+        padding: 8px 0;
+        background: #000;
+        z-index: 10;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .input-row input {
+        flex: 1;
+        padding: 14px 16px;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 12px;
+        color: #fff;
+        font-size: 16px;
+        outline: none;
+      }
+      .input-row input:focus { border-color: #555; }
+      .input-row input::placeholder { color: #555; }
+
+      .input-row button {
+        padding: 14px 20px;
+        background: #fff;
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .input-row button:active { opacity: 0.7; }
+
+      .agent-status {
+        padding: 8px 0;
+        font-size: 13px;
+        color: #888;
+        min-height: 28px;
+      }
+
+      .response-area {
+        flex: 1;
+        padding: 12px 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .response-text {
+        font-size: 15px;
+        line-height: 1.6;
+        color: #e0e0e0;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      /* Approval dialog */
+      .approval {
+        display: none;
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 16px;
+        padding: 20px;
+        margin: 12px 0;
+      }
+      .approval.active { display: block; }
+
+      .approval h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 8px;
+      }
+
+      .approval .tool-details {
+        font-size: 13px;
+        color: #888;
+        margin-bottom: 16px;
+        white-space: pre-wrap;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .approval .btn-row {
+        display: flex;
+        gap: 12px;
+      }
+      .approval .btn-row .btn { flex: 1; }
+
+      .disconnect-row {
+        padding: 16px 0;
+        border-top: 1px solid #222;
+        margin-top: auto;
+        text-align: center;
+      }
+
+      .error-msg {
+        color: #ff3b30;
+        font-size: 14px;
+        text-align: center;
+        padding: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Faria Remote</h1>
+        <div class="status-dot" id="statusDot"></div>
+      </header>
+
+      <!-- Setup screen -->
+      <div id="setup">
+        <p>Paste the connection URL from Faria on your Mac to connect.</p>
+        <input type="url" id="serverUrl" placeholder="https://....trycloudflare.com" autocapitalize="off" autocorrect="off" />
+        <input type="text" id="pairingToken" placeholder="Pairing token" autocapitalize="off" autocorrect="off" />
+        <div id="setupError" class="error-msg"></div>
+        <button class="btn" id="connectBtn" onclick="connect()">Connect</button>
+      </div>
+
+      <!-- Main screen -->
+      <div id="main">
+        <div class="input-area">
+          <div class="input-row">
+            <input type="text" id="queryInput" placeholder="What should Faria do?" enterkeyhint="send" autocapitalize="off" />
+            <button onclick="submitTask()" id="submitBtn">Send</button>
+          </div>
+          <div class="agent-status" id="agentStatus"></div>
+        </div>
+
+        <div class="response-area">
+          <div class="response-text" id="responseText"></div>
+
+          <div class="approval" id="approvalDialog">
+            <h3 id="approvalTitle">Approve action?</h3>
+            <div class="tool-details" id="approvalDetails"></div>
+            <div class="btn-row">
+              <button class="btn danger" onclick="respondApproval(false)">Deny</button>
+              <button class="btn" onclick="respondApproval(true)">Approve</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="disconnect-row">
+          <button class="btn secondary" onclick="disconnect()">Disconnect</button>
+        </div>
+      </div>
+    </div>
+
+    <script is:inline>
+      let serverUrl = localStorage.getItem('faria_remote_url');
+      let sessionToken = localStorage.getItem('faria_remote_token');
+      let eventSource = null;
+      let currentResponse = '';
+
+      // Check if already connected
+      if (serverUrl && sessionToken) {
+        showMain();
+        startSSE();
+      }
+
+      async function connect() {
+        const url = document.getElementById('serverUrl').value.trim().replace(/\/$/, '');
+        const token = document.getElementById('pairingToken').value.trim();
+        const errorEl = document.getElementById('setupError');
+        errorEl.textContent = '';
+
+        if (!url || !token) {
+          errorEl.textContent = 'Please enter both URL and pairing token';
+          return;
+        }
+
+        document.getElementById('connectBtn').disabled = true;
+
+        try {
+          // First check health
+          const health = await fetch(url + '/api/health');
+          if (!health.ok) throw new Error('Cannot reach server');
+
+          // Authenticate with pairing token
+          const res = await fetch(url + '/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token }),
+          });
+
+          const data = await res.json();
+          if (!res.ok || !data.sessionToken) {
+            throw new Error(data.error || 'Authentication failed');
+          }
+
+          serverUrl = url;
+          sessionToken = data.sessionToken;
+          localStorage.setItem('faria_remote_url', serverUrl);
+          localStorage.setItem('faria_remote_token', sessionToken);
+
+          showMain();
+          startSSE();
+        } catch (err) {
+          errorEl.textContent = err.message;
+        } finally {
+          document.getElementById('connectBtn').disabled = false;
+        }
+      }
+
+      function showMain() {
+        document.getElementById('setup').style.display = 'none';
+        document.getElementById('main').classList.add('active');
+      }
+
+      function showSetup() {
+        document.getElementById('setup').style.display = 'flex';
+        document.getElementById('main').classList.remove('active');
+        setStatus('disconnected');
+      }
+
+      function disconnect() {
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        localStorage.removeItem('faria_remote_url');
+        localStorage.removeItem('faria_remote_token');
+        serverUrl = null;
+        sessionToken = null;
+        showSetup();
+      }
+
+      function setStatus(state) {
+        const dot = document.getElementById('statusDot');
+        dot.className = 'status-dot';
+        if (state === 'connected') dot.classList.add('connected');
+        if (state === 'error') dot.classList.add('error');
+      }
+
+      function startSSE() {
+        if (eventSource) eventSource.close();
+
+        // EventSource doesn't support custom headers, so pass token as query param
+        eventSource = new EventSource(serverUrl + '/api/task/stream?token=' + sessionToken);
+
+        eventSource.onopen = () => setStatus('connected');
+        eventSource.onerror = () => setStatus('error');
+
+        eventSource.onmessage = (e) => {
+          try {
+            const event = JSON.parse(e.data);
+            handleEvent(event);
+          } catch { /* ignore parse errors */ }
+        };
+      }
+
+      function handleEvent(event) {
+        const statusEl = document.getElementById('agentStatus');
+        const responseEl = document.getElementById('responseText');
+
+        switch (event.type) {
+          case 'connected':
+            setStatus('connected');
+            break;
+          case 'status':
+            statusEl.textContent = event.data;
+            break;
+          case 'chunk':
+            currentResponse += event.data;
+            responseEl.textContent = currentResponse;
+            // Auto-scroll
+            responseEl.scrollIntoView({ block: 'end', behavior: 'smooth' });
+            break;
+          case 'chunk-clear':
+            currentResponse = '';
+            responseEl.textContent = '';
+            break;
+          case 'response':
+            currentResponse = event.data;
+            responseEl.textContent = currentResponse;
+            statusEl.textContent = '';
+            break;
+          case 'tool-approval':
+            showApproval(event.data);
+            break;
+        }
+      }
+
+      function showApproval(data) {
+        const dialog = document.getElementById('approvalDialog');
+        const title = document.getElementById('approvalTitle');
+        const details = document.getElementById('approvalDetails');
+
+        title.textContent = 'Approve: ' + (data.displayName || data.toolName);
+
+        let detailText = '';
+        if (data.details) {
+          for (const [key, value] of Object.entries(data.details)) {
+            detailText += key + ': ' + value + '\n';
+          }
+        } else {
+          detailText = JSON.stringify(data.args, null, 2);
+        }
+        details.textContent = detailText;
+        dialog.classList.add('active');
+      }
+
+      async function respondApproval(approved) {
+        document.getElementById('approvalDialog').classList.remove('active');
+
+        try {
+          await fetch(serverUrl + '/api/task/approve', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + sessionToken,
+            },
+            body: JSON.stringify({ approved }),
+          });
+        } catch (err) {
+          console.error('Approval response failed:', err);
+        }
+      }
+
+      async function submitTask() {
+        const input = document.getElementById('queryInput');
+        const query = input.value.trim();
+        if (!query) return;
+
+        // Clear previous response
+        currentResponse = '';
+        document.getElementById('responseText').textContent = '';
+        document.getElementById('agentStatus').textContent = 'Sending...';
+        document.getElementById('approvalDialog').classList.remove('active');
+
+        try {
+          const res = await fetch(serverUrl + '/api/task', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + sessionToken,
+            },
+            body: JSON.stringify({ query }),
+          });
+
+          if (!res.ok) {
+            const data = await res.json();
+            document.getElementById('agentStatus').textContent = 'Error: ' + (data.error || 'Failed');
+            return;
+          }
+
+          input.value = '';
+        } catch (err) {
+          document.getElementById('agentStatus').textContent = 'Error: ' + err.message;
+        }
+      }
+
+      // Submit on Enter
+      document.getElementById('queryInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitTask();
+        }
+      });
+
+      // Register service worker for PWA installability
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/remote/sw.js');
+      }
+    </script>
+  </body>
+</html>
